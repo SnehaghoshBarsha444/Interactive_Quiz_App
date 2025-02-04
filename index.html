@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Interactive Quiz App</title>
+    <!-- TailwindCSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Alpine.js CDN -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+    <div x-data="quizApp()" class="quiz-card p-8 w-full max-w-xl transition-all duration-500">
+        <!-- Start Quiz Form -->
+        <div x-show="!started && !loading && !finished" class="animate-fade-in">
+            <h1 class="text-3xl font-bold mb-6 text-center text-primary">Start a Quiz</h1>
+            <form @submit.prevent="startQuiz">
+                <div class="mb-4">
+                    <label class="block mb-2 font-semibold text-secondary">Number of Questions</label>
+                    <input type="number" x-model.number="number" min="1" max="50" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block mb-2 font-semibold text-secondary">Category</label>
+                    <select x-model="category" name="trivia_category" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="any">Any Category</option>
+                        <option value="9">General Knowledge</option>
+                        <option value="10">Entertainment: Books</option>
+                        <option value="11">Entertainment: Film</option>
+                        <option value="12">Entertainment: Music</option>
+                        <option value="13">Entertainment: Musicals & Theatres</option>
+                        <option value="14">Entertainment: Television</option>
+                        <option value="15">Entertainment: Video Games</option>
+                        <option value="16">Entertainment: Board Games</option>
+                        <option value="17">Science & Nature</option>
+                        <option value="18">Science: Computers</option>
+                        <option value="19">Science: Mathematics</option>
+                        <option value="20">Mythology</option>
+                        <option value="21">Sports</option>
+                        <option value="22">Geography</option>
+                        <option value="23">History</option>
+                        <option value="24">Politics</option>
+                        <option value="25">Art</option>
+                        <option value="26">Celebrities</option>
+                        <option value="27">Animals</option>
+                        <option value="28">Vehicles</option>
+                        <option value="29">Entertainment: Comics</option>
+                        <option value="30">Science: Gadgets</option>
+                        <option value="31">Entertainment: Japanese Anime & Manga</option>
+                        <option value="32">Entertainment: Cartoon & Animations</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block mb-2 font-semibold text-secondary">Difficulty</label>
+                    <select x-model="difficulty" name="trivia_difficulty" class="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-primary">
+                        <option value="any">Any Difficulty</option>
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-primary text-white p-2 rounded hover:bg-primary-dark transition duration-300">Start Quiz</button>
+            </form>
+        </div>
+        
+        <!-- Loading State -->
+        <div x-show="loading" class="text-center">
+            <div class="animate-bounce text-primary">
+                <svg class="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16l2.879-2.879m0 0a3 3 0 104.243-4.242 3 3 0 00-4.243 4.242zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <p class="text-xl text-secondary mt-4">Loading questions...</p>
+        </div>
+        
+        <!-- Quiz Questions -->
+        <div x-show="started && !finished" class="animate-slide-in">
+            <div class="mb-4">
+                <div class="flex justify-between items-center mb-2">
+                    <h2 class="text-2xl font-bold text-primary">Question <span x-text="currentQuestionIndex + 1"></span> of <span x-text="questions.length"></span></h2>
+                    <div class="text-secondary font-semibold">
+                        Time: <span x-text="timer"></span>s
+                    </div>
+                </div>
+                <!-- Timer Bar -->
+                <div class="w-full bg-gray-200 rounded-full h-1 mb-4">
+                    <div class="timer-bar" :style="'width: ' + (timer / 30 * 100) + '%'"></div>
+                </div>
+            </div>
+            <p class="mt-2 text-lg text-secondary question-transition" x-html="currentQuestion.question"></p>
+            <div class="mb-4 grid grid-cols-1 gap-2 mt-4">
+                <template x-for="(answer, index) in currentQuestion.answers" :key="index">
+                    <button 
+                        @click="selectAnswer(answer)" 
+                        :class="buttonClass(answer)"
+                        class="answer-option w-full p-3 rounded text-left transition duration-300"
+                        :disabled="selectedAnswer"
+                    >
+                        <span x-html="answer"></span>
+                    </button>
+                </template>
+            </div>
+            <!-- Feedback and Next Button -->
+            <div x-show="selectedAnswer" class="mt-4 text-center animate-fade-in">
+                <p :class="{'text-success': isCorrect, 'text-error': !isCorrect}" class="mb-2 font-semibold">
+                    <span x-text="isCorrect ? 'Correct!' : 'Wrong! Correct answer: ' + currentQuestion.correct_answer"></span>
+                </p>
+                <button @click="nextQuestion" class="bg-primary text-white px-6 py-2 rounded hover:bg-primary-dark transition duration-300">Next Question</button>
+            </div>
+        </div>
+        
+        <!-- Quiz Completion -->
+        <div x-show="finished" class="text-center animate-fade-in">
+            <h2 class="text-3xl font-bold mb-4 text-primary">Quiz Finished!</h2>
+            <div class="mb-6">
+                <p class="text-2xl text-secondary mb-2">Your Score: <span x-text="score"></span> / <span x-text="questions.length"></span></p>
+                <p class="text-lg text-secondary">Percentage: <span x-text="Math.round((score/questions.length) * 100)"></span>%</p>
+            </div>
+            
+            <!-- Quiz Results -->
+            <div class="mt-6 mb-16 text-left max-h-[60vh] overflow-y-auto px-2 sm:px-4 md:px-6">
+                <h3 class="text-xl sm:text-2xl font-bold text-primary mb-4 sticky top-0 bg-white/95 backdrop-blur-sm py-2">Review Your Answers</h3>
+                <template x-for="(question, index) in questions" :key="index">
+                    <div class="mb-4 p-3 sm:p-4 rounded-lg shadow-sm" :class="getResultCardClass(index)">
+                        <div class="flex items-start gap-2 sm:gap-3">
+                            <span class="flex-shrink-0 w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-white mt-0.5" 
+                                  :class="getUserAnswerClass(index)">
+                                <template x-if="isQuestionCorrect(index)">✓</template>
+                                <template x-if="!isQuestionCorrect(index)">✗</template>
+                            </span>
+                            <div class="flex-grow min-w-0">
+                                <p class="font-semibold mb-2 text-sm sm:text-base break-words" x-html="'Q' + (index + 1) + '. ' + question.question"></p>
+                                <div class="space-y-1 text-xs sm:text-sm">
+                                    <p class="flex flex-wrap gap-x-2">
+                                        <span class="font-medium">Your Answer:</span> 
+                                        <span :class="getUserAnswerTextClass(index)" class="break-words" x-text="getUserAnswer(index) || 'No answer'"></span>
+                                    </p>
+                                    <template x-if="!isQuestionCorrect(index)">
+                                        <p class="flex flex-wrap gap-x-2">
+                                            <span class="font-medium">Correct Answer:</span> 
+                                            <span class="text-success break-words" x-text="question.correct_answer"></span>
+                                        </p>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+            
+            <button @click="resetQuiz" class="bg-primary text-white px-6 py-2 rounded hover:bg-primary-dark transition duration-300">Restart Quiz</button>
+        </div>
+    </div>
+    
+    <footer class="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-primary/10">
+        <div class="copy text-center py-4 text-[#3674B5] font-medium"> (Miss WebDesigner)(Sneha Ghosh)(@Technical_Isopod_075)</div>
+    </footer>
+    
+    <!-- Custom JavaScript -->
+    <script src="js/script.js"></script>
+</body>
+</html>

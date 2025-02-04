@@ -1,0 +1,228 @@
+/* Color Palette from Color Hunt: https://colorhunt.co/palette/3674b5578fcaa1e3f9d1f8ef */
+
+/* Primary Colors */
+:root {
+    --primary: #3674B5;
+    --primary-dark: #2c5d91;
+    --secondary: #578FCA;
+    --accent: #A1E3F9;
+    --background: #D1F8EF;
+    --success: #4cd137;
+    --success-dark: #44bd32;
+    --error: #e84118;
+}
+
+/* Apply the color variables */
+body {
+    background-color: var(--background) !important;
+    padding-bottom: 60px;
+}
+
+.text-primary {
+    color: var(--primary);
+}
+
+.bg-primary {
+    background-color: var(--primary);
+}
+
+.hover\:bg-primary-dark:hover {
+    background-color: var(--primary-dark);
+}
+
+.text-secondary {
+    color: var(--secondary);
+}
+
+.text-success {
+    color: var(--success);
+}
+
+.text-error {
+    color: var(--error);
+}
+
+.bg-success {
+    background-color: var(--success);
+}
+
+.hover\:bg-success-dark:hover {
+    background-color: var(--success-dark);
+}
+
+/* Timer Animation */
+@keyframes countdown {
+    from { width: 100%; background-color: var(--accent); }
+    to { width: 0%; background-color: var(--error); }
+}
+
+.timer-bar {
+    height: 4px;
+    background-color: var(--accent);
+    transition: width 1s linear;
+    border-radius: 2px;
+}
+
+/* Card Styles */
+.quiz-card {
+    background-color: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(54, 116, 181, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.quiz-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(54, 116, 181, 0.2);
+}
+
+/* Button Hover Effects */
+button:not(:disabled) {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+button:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(54, 116, 181, 0.2);
+}
+
+/* Animations */
+@keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.animate-fade-in {
+    animation: fade-in 0.5s ease-in-out;
+}
+
+@keyframes slide-in {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-slide-in {
+    animation: slide-in 0.5s ease-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.animate-bounce {
+    animation: bounce 0.5s ease-in-out;
+}
+
+/* Question Transition */
+@keyframes question-fade {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.question-transition {
+    animation: question-fade 0.3s ease-out;
+}
+
+/* Answer Hover Effect */
+.answer-option {
+    background-color: white;
+    border: 2px solid var(--accent);
+    transition: all 0.3s ease;
+}
+
+.answer-option:hover:not(:disabled) {
+    background-color: var(--accent);
+    transform: translateX(5px);
+}
+
+/* Quiz Results Responsive Styles */
+.max-h-[60vh] {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+}
+
+.max-h-[60vh]::-webkit-scrollbar {
+    width: 6px;
+}
+
+.max-h-[60vh]::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.max-h-[60vh]::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: 3px;
+}
+
+/* Mobile-first padding adjustments */
+@media (max-width: 640px) {
+    .quiz-card {
+        margin: 1rem;
+        padding: 1rem !important;
+    }
+    
+    /* Ensure text is readable on small screens */
+    .text-sm {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
+    
+    /* Adjust spacing for mobile */
+    .mb-4 {
+        margin-bottom: 1rem;
+    }
+    
+    .p-3 {
+        padding: 0.75rem;
+    }
+    
+    /* Make sure the footer doesn't overlap with content */
+    .mb-16 {
+        margin-bottom: 4rem;
+    }
+}
+
+/* Tablet and larger screens */
+@media (min-width: 641px) {
+    .quiz-card {
+        margin: 2rem;
+        padding: 2rem !important;
+    }
+}
+
+/* Custom scrollbar styling for iOS devices */
+@supports (-webkit-touch-callout: none) {
+    .max-h-[60vh] {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* Ensure proper text wrapping for long questions and answers */
+.break-words {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+/* Sticky header for results section */
+.sticky {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Smooth transitions for hover states */
+.rounded-lg {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.rounded-lg:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Ensure proper spacing between question cards */
+.mb-4:last-child {
+    margin-bottom: 0;
+}
